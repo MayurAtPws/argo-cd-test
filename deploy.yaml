@@ -1,34 +1,24 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
-  name: web-server
-  labels:
-    app: web-server
+  name: my-web-server
+  namespace: argocd
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: web-server
-  template:
-    metadata:
-      labels:
-        app: web-server
-    spec:
-      containers:
-      - name: web-server
-        image: nginx:latest
-        ports:
-        - containerPort: 80
+  project: default
 
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: web-server-service
-spec:
-  type: ClusterIP
-  selector:
-    app: web-server
-  ports:
-    - port: 80
-      targetPort: 80
+  source:
+    repoURL: https://github.com/MayurAtPws/argo-cd-test.git
+    targetRevision: HEAD
+    path: . # Path to the directory containing the Kubernetes manifests
+
+  destination: 
+    server: https://kubernetes.default.svc
+    namespace: myapp
+
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+
+    automated:
+      selfHeal: true
+      prune: true
